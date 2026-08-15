@@ -31,14 +31,14 @@ decorator; radish handles the rest.
 
 ## Quick example
 
-\`\`\`python
+```python
 from radish import Actor, expose
 
 class Greeter(Actor):
     @expose
     async def hello(self, name):
         return f"Hello, {name}!"
-\`\`\`
+```
 
 ## Status
 
