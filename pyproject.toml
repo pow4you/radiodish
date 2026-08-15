@@ -1,0 +1,14 @@
+[project]
+name = "radiodish"
+version = "0.1.0"
+description = "A standalone, async RADIO-DISH implementation over UDP (ZeroMQ RFC 48), with automatic peer discovery/autowiring and an Erlang-actor-model layer on top."
+requires-python = ">=3.9"
+readme = "README.md"
+dependencies = []
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["radish", "radish.autowire", "actor", "utils"]
