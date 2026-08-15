@@ -3,8 +3,34 @@ name = "radiodish"
 version = "0.1.0"
 description = "A standalone, async RADIO-DISH implementation over UDP (ZeroMQ RFC 48), with automatic peer discovery/autowiring and an Erlang-actor-model layer on top."
 requires-python = ">=3.9"
-readme = "README.md"
-dependencies = []
+license = { text = "MIT" }  # or whatever you're using
+authors = [
+    { name = "Lea Z. Houston" }
+]
+keywords = [
+    "actor-model",
+    "asyncio",
+    "distributed-systems",
+    "message-passing",
+    "udp",
+    "radio-dish",
+    "zeromq",
+    "concurrency",
+    "actors",
+    "peer-discovery",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Distributed Computing",
+    "Topic :: System :: Networking",
+    "Framework :: AsyncIO",
+]
 
 [build-system]
 requires = ["setuptools>=61.0"]
@@ -12,3 +38,8 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 packages = ["radish", "radish.autowire", "actor", "utils"]
+
+[project.urls]
+Homepage = "https://github.com/pow4you/radiodish"
+Repository = "https://github.com/pow4you/radiodish"
+Issues = "https://github.com/pow4you/radiodish/issues"
