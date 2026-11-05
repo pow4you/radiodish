@@ -1,0 +1,31 @@
+version = 1
+revision = 3
+requires-python = ">=3.9"
+
+[manifest]
+members = [
+    "radiodish",
+    "radiodish-actor",
+    "radiodish-workspace",
+]
+
+[[package]]
+name = "radiodish"
+version = "0.1.0"
+source = { editable = "packages/radiodish" }
+
+[[package]]
+name = "radiodish-actor"
+version = "0.1.0"
+source = { editable = "packages/radiodish-actor" }
+dependencies = [
+    { name = "radiodish" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "radiodish", editable = "packages/radiodish" }]
+
+[[package]]
+name = "radiodish-workspace"
+version = "0.0.0"
+source = { virtual = "." }

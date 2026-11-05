@@ -1,0 +1,11 @@
+[project]
+name = "radiodish-workspace"
+version = "0.0.0"
+description = "Workspace root for radiodish -- see packages/radiodish and packages/radiodish-actor for the actual publishable packages. This root itself is not published."
+requires-python = ">=3.9"
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[tool.uv]
+package = false

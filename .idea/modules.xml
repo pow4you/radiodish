@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/radiodish.iml" filepath="$PROJECT_DIR$/.idea/radiodish.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/radiodish-actor.iml" filepath="$PROJECT_DIR$/.idea/radiodish-actor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/radiodish-workspace.iml" filepath="$PROJECT_DIR$/.idea/radiodish-workspace.iml" />
+    </modules>
+  </component>
+</project>

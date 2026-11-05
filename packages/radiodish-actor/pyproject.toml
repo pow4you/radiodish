@@ -1,0 +1,20 @@
+[project]
+name = "radiodish-actor"
+version = "0.1.0"
+description = "An Erlang-actor-model-flavored layer on top of radiodish -- group-addressed message dispatch over an autowired RADIO-DISH mesh."
+requires-python = ">=3.9"
+readme = "README.md"
+dependencies = ["radiodish"]
+
+[tool.uv.sources]
+radiodish = { workspace = true }
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["radioactor"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
