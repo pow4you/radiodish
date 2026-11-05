@@ -1,10 +1,19 @@
 [project]
 name = "radiodish"
-version = "0.1.0"
+version = "1.0.0"
 description = "A standalone, async RADIO-DISH implementation over UDP (ZeroMQ RFC 48), with automatic peer discovery and autowiring."
 requires-python = ">=3.9"
 readme = "README.md"
 dependencies = []
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: System :: Networking",
+]
+
+[project.urls]
+Homepage = "https://github.com/pow4you/radiodish"
 
 [build-system]
 requires = ["setuptools>=61.0"]
@@ -15,3 +24,4 @@ packages = ["radish", "radish._internal", "radish.autowire"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
