@@ -5,8 +5,8 @@
       <sourceFolder url="file://$MODULE_DIR$/packages/radiodish-actor/src" />
       <sourceFolder url="file://$MODULE_DIR$/packages/radiodish-actor/src" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="~/PycharmProjects/radiator/.venv" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="radiodish" exported="" />
+    <orderEntry type="jdk" jdkName="~/PycharmProjects/radiator/.venv" jdkType="Python SDK" />
   </component>
 </module>
