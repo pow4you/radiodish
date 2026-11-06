@@ -20,8 +20,13 @@ Homepage = "https://github.com/pow4you/radiodish"
 requires = ["setuptools>=77.0"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.setuptools]
+packages = ["radish", "radish._internal", "radish.autowire"]
+
+[tool.setuptools.package-dir]
+radish = "src"
+"radish._internal" = "src/_internal"
+"radish.autowire" = "src/autowire"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

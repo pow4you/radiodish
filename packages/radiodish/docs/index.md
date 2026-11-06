@@ -125,7 +125,7 @@ by responsibility, shared internals pulled into a private subpackage
 rather than duplicated:
 
 ```
-radish/
+radish/                      (lives in src/ on disk; src/ is the `radish` package)
     errors.py                 RadioDishError, InvalidGroupError (public re-exports)
     protocol.py                 wire format: encode_frame/decode_frame, MSG_DATA/JOIN/LEAVE
     transport.py                 shared plumbing: _UDPProtocol, _BoundedDropQueue, _Peer

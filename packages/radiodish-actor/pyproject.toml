@@ -22,8 +22,11 @@ radiodish = { workspace = true }
 requires = ["setuptools>=77.0"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.setuptools]
+packages = ["radioactor"]
+
+[tool.setuptools.package-dir]
+radioactor = "src"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
