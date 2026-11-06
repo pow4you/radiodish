@@ -4,10 +4,11 @@ version = "1.0.0"
 description = "An Erlang-actor-model-flavored layer on top of radiodish -- group-addressed message dispatch over an autowired RADIO-DISH mesh."
 requires-python = ">=3.9"
 readme = "README.md"
-dependencies = ["radiodish"]
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = ["radiodish>=1.0.0"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 
@@ -18,7 +19,7 @@ Homepage = "https://github.com/pow4you/radiodish"
 radiodish = { workspace = true }
 
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=77.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
