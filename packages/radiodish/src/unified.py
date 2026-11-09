@@ -10,10 +10,13 @@ import asyncio
 import socket
 from typing import Optional, Union
 
-from radiodish.errors import RadioDishError
+from radiodish.errors import RadioDishError, SocketClosedError
 from radiodish.protocol import GroupLike
 from radiodish.radio import RadioSocket
 from radiodish.dish import DishSocket
+
+
+_CLOSED = object()  # sentinel pushed into recv_queue on close()
 
 
 class RadishSocket:
@@ -127,8 +130,13 @@ class RadishSocket:
             pass
 
     async def recv(self) -> tuple[bytes, bytes]:
-        """Await the next (group, payload) received from any connected peer."""
-        return await self.recv_queue.get()
+        """Await the next (group, payload) received from any connected peer.
+        Raises SocketClosedError if the socket is (or gets) closed."""
+        item = await self.recv_queue.get()
+        if item is _CLOSED:
+            self.recv_queue.put_nowait(_CLOSED)  # wake any other waiters too
+            raise SocketClosedError("RadishSocket is closed")
+        return item
 
     async def _recv_loop(self):
         try:
@@ -140,6 +148,21 @@ class RadishSocket:
                     pass  # consumer isn't keeping up; drop rather than block
         except asyncio.CancelledError:
             pass
+        except SocketClosedError:
+            # The dish was closed underneath us: nothing more will ever
+            # arrive, so tell anyone blocked in recv() instead of leaving
+            # them waiting forever.
+            self._wake_receivers()
+
+    def _wake_receivers(self) -> None:
+        """Push the closed-sentinel into recv_queue, making room first if a
+        bounded queue is full. recv() re-queues it, so every waiter wakes."""
+        while True:
+            try:
+                self.recv_queue.put_nowait(_CLOSED)
+                return
+            except asyncio.QueueFull:
+                self.recv_queue.get_nowait()
 
     async def _broadcast_loop(self):
         try:
@@ -150,8 +173,11 @@ class RadishSocket:
             pass
 
     async def close(self) -> None:
+        if self._closed:
+            return
         self._closed = True
         for task in self._tasks:
             task.cancel()
         await self.radio.close()
         await self.dish.close()
+        self._wake_receivers()

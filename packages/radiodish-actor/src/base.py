@@ -14,6 +14,7 @@ import warnings
 from typing import Callable, Iterable, Optional
 
 from radiodish import RadioDishError
+from radiodish.errors import SocketClosedError
 from radiodish.autowire import autowired_radish, DEFAULT_DISCOVERY_PORT
 
 
@@ -180,7 +181,7 @@ class Actor:
                     continue
                 for handler in self._groups_to_handlers.get(group_str, ()):
                     await self._dispatch_one(handler, msg)
-        except asyncio.CancelledError:
+        except (asyncio.CancelledError, SocketClosedError):
             pass
 
     async def _dispatch_one(self, handler: Callable, msg: dict) -> None:
