@@ -1,7 +1,7 @@
 # radioactor
 
 An Erlang-actor-model-flavored `Actor` base class, running over
-`radish.autowire.autowired_radish()` instead of a custom VM.
+`radiodish.autowire.autowired_radish()` instead of a custom VM.
 
 ## Install
 

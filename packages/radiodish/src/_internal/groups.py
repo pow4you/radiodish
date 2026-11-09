@@ -1,11 +1,11 @@
 """
-radish/_internal/groups.py — group-name handling shared between two
-different representations of the same concept within radish itself:
+radiodish/_internal/groups.py — group-name handling shared between two
+different representations of the same concept within radiodish itself:
 
-- radish.protocol needs a STRICT, wire-format validator: a group is
+- radiodish.protocol needs a STRICT, wire-format validator: a group is
   0-255 raw bytes, full stop, because that's what RFC 48's ABNF requires
   and what the frame header's single length byte can represent.
-- radish.autowire.discovery needs a LOOSE, JSON-safe converter: group
+- radiodish.autowire.discovery needs a LOOSE, JSON-safe converter: group
   names have to survive being embedded in a discovery announcement
   payload, so bytes get decoded to str (JSON can't carry raw bytes) and
   anything already a plain string passes through untouched.
@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from typing import Iterable, Union
 
-from radish._internal.errors import InvalidGroupError
+from radiodish._internal.errors import InvalidGroupError
 
 GroupLike = Union[str, bytes]
 MAX_GROUP_LEN = 255

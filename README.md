@@ -8,7 +8,7 @@ This repo holds two packages that are developed together but stand alone:
 
 | Package | What it is | Dependencies |
 | --- | --- | --- |
-| [`radiodish`](packages/radiodish/) | An async, pure-Python implementation of ZeroMQ's [RADIO-DISH pattern](https://rfc.zeromq.org/spec/48/) over plain UDP, plus automatic ports, peer discovery and autowiring. Import it as `radish`. | none (stdlib only) |
+| [`radiodish`](packages/radiodish/) | An async, pure-Python implementation of ZeroMQ's [RADIO-DISH pattern](https://rfc.zeromq.org/spec/48/) over plain UDP, plus automatic ports, peer discovery and autowiring. Import it as `radiodish`. | none (stdlib only) |
 | [`radiodish-actor`](packages/radiodish-actor/) | An Erlang-flavored actor layer on top: expose methods, call them by name, and let discovery do the rest. Import it as `radioactor`. | `radiodish` |
 
 ## See it work
@@ -103,7 +103,7 @@ root depends on, which is nothing.
 └── packages/
     ├── radiodish/
     │   ├── pyproject.toml
-    │   ├── src/                the importable `radish` package
+    │   ├── src/                the importable `radiodish` package
     │   ├── tests/
     │   └── docs/               docs + runnable examples
     └── radiodish-actor/
@@ -114,7 +114,7 @@ root depends on, which is nothing.
 ```
 
 Each `src/` folder *is* the import package: `packages/radiodish/src/` is
-`radish`, and `packages/radiodish-actor/src/` is `radioactor`. The mapping
+`radiodish`, and `packages/radiodish-actor/src/` is `radioactor`. The mapping
 lives in each package's `pyproject.toml` under `[tool.setuptools.package-dir]`.
 If you add a subpackage to `radiodish`, add a line for it there too.
 

@@ -1,13 +1,13 @@
 """
-radish/autowire/discovery.py — the "LAN" discovery tier (UDP multicast,
+radiodish/autowire/discovery.py — the "LAN" discovery tier (UDP multicast,
 a small homemade mDNS) plus the loopback-scoped fallback within it, and
 the Discoverer class that ties this together with the local-file tier
-from radish.autowire.local_discovery.
+from radiodish.autowire.local_discovery.
 
 Two tiers active by default, matching "local machine or my LAN, not the
 internet unless you explicitly say so":
 
-- "my machine": radish.autowire.local_discovery -- pure filesystem, no
+- "my machine": radiodish.autowire.local_discovery -- pure filesystem, no
   sockets, works identically whether or not any network interface is up.
 - "my LAN": UDP multicast here, three tiers tried in order each time --
   any interface, then loopback-scoped specifically (for when the OS
@@ -32,10 +32,10 @@ import warnings
 from dataclasses import dataclass
 from typing import Iterable, Optional
 
-from radish.errors import RadioDishError
-from radish.autowire.network import detect_local_addresses, _is_local_scope_address
-from radish.autowire.local_discovery import _local_discovery_dir, _safe_filename
-from radish._internal.groups import groups_as_str
+from radiodish.errors import RadioDishError
+from radiodish.autowire.network import detect_local_addresses, _is_local_scope_address
+from radiodish.autowire.local_discovery import _local_discovery_dir, _safe_filename
+from radiodish._internal.groups import groups_as_str
 
 MULTICAST_GROUP = "239.255.42.99"  # organization-local scope, RFC 2365
 DEFAULT_DISCOVERY_PORT = 9999
@@ -337,7 +337,10 @@ class Discoverer:
                 was_scope = self._multicast_scope
                 old_protocol = self._protocol
                 ok = await self._try_open_socket()
-                if ok and (self._multicast_active, self._multicast_scope) != (was_active, was_scope):
+                if ok and (
+                        self._multicast_active,
+                        self._multicast_scope
+                ) != (was_active, was_scope):
                     if old_protocol and old_protocol.transport:
                         old_protocol.transport.close()
                     self._send_announce()  # don't wait for the next tick

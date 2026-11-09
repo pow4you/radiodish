@@ -1,5 +1,5 @@
 """
-radish/autowire/network.py — automatic port assignment and local address
+radiodish/autowire/network.py — automatic port assignment and local address
 detection: the pieces that figure out "what port pair is free" and "what
 address(es) can this machine be reached at," with no dependency on
 whether a network is even connected.

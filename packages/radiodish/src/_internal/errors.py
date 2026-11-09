@@ -1,9 +1,9 @@
 """
-radish/_internal/errors.py — the exception hierarchy for the radish
+radiodish/_internal/errors.py — the exception hierarchy for the radiodish
 package. Private subpackage (leading underscore) -- not part of the
-public API, and nothing outside radish itself needs it, including
-radioactor, which only ever imports RadioDishError via `from radish
-import RadioDishError` (radish.errors re-exports these under the public
+public API, and nothing outside radiodish itself needs it, including
+radioactor, which only ever imports RadioDishError via `from radiodish
+import RadioDishError` (radiodish.errors re-exports these under the public
 namespace for that purpose).
 """
 

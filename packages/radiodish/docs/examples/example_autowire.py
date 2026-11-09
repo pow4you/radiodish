@@ -20,7 +20,7 @@ add --seed host:port pointing discovery at specific peers directly:
 import argparse
 import asyncio
 
-from radish.autowire import autowired_radish, DEFAULT_DISCOVERY_PORT
+from radiodish.autowire import autowired_radish, DEFAULT_DISCOVERY_PORT
 
 
 async def main():

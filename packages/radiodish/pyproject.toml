@@ -21,12 +21,12 @@ requires = ["setuptools>=77.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["radish", "radish._internal", "radish.autowire"]
+packages = ["radiodish", "radiodish._internal", "radiodish.autowire"]
 
 [tool.setuptools.package-dir]
-radish = "src"
-"radish._internal" = "src/_internal"
-"radish.autowire" = "src/autowire"
+radiodish = "src"
+"radiodish._internal" = "src/_internal"
+"radiodish.autowire" = "src/autowire"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

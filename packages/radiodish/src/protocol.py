@@ -1,5 +1,5 @@
 """
-radish/protocol.py — the RFC 48 wire format: frame encoding/decoding.
+radiodish/protocol.py — the RFC 48 wire format: frame encoding/decoding.
 
 Every UDP datagram is a single frame:
 
@@ -24,8 +24,8 @@ from __future__ import annotations
 
 import struct
 
-from radish.errors import RadioDishError
-from radish._internal.groups import GroupLike, MAX_GROUP_LEN, normalize_group
+from radiodish.errors import RadioDishError
+from radiodish._internal.groups import GroupLike, MAX_GROUP_LEN, normalize_group
 
 MSG_DATA = 0x01
 MSG_JOIN = 0x02
@@ -35,7 +35,7 @@ _HEADER = struct.Struct("!BB")  # type, group_len
 
 Address = tuple  # (host: str, port: int)
 
-# Re-exported here too so existing `from radish.protocol import normalize_group`
+# Re-exported here too so existing `from radiodish.protocol import normalize_group`
 # style imports (and MAX_GROUP_LEN / GroupLike) keep working without every
 # caller needing to know these actually live in utils.groups.
 __all__ = [

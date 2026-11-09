@@ -1,7 +1,7 @@
 import asyncio
 import socket
 
-from radish.autowire import find_free_port_pair, detect_local_addresses, Discoverer, autowired_radish
+from radiodish.autowire import find_free_port_pair, detect_local_addresses, Discoverer, autowired_radish
 
 
 def test_find_free_port_pair_no_collision():

@@ -15,7 +15,7 @@ Remember each RadishSocket reserves TWO ports: --port (RADIO) and
 import argparse
 import asyncio
 
-from radish import RadishSocket
+from radiodish import RadishSocket
 
 
 async def main():

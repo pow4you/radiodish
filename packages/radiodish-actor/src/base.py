@@ -13,8 +13,8 @@ import uuid
 import warnings
 from typing import Callable, Iterable, Optional
 
-from radish import RadioDishError
-from radish.autowire import autowired_radish, DEFAULT_DISCOVERY_PORT
+from radiodish import RadioDishError
+from radiodish.autowire import autowired_radish, DEFAULT_DISCOVERY_PORT
 
 
 class Actor:

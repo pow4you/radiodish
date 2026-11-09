@@ -1,5 +1,5 @@
 import asyncio
-from radish import RadishSocket
+from radiodish import RadishSocket
 
 
 async def test_mesh_broadcast_and_recv():

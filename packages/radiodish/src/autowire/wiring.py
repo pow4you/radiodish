@@ -1,5 +1,5 @@
 """
-radish/autowire/wiring.py — AutoWirer: the actual "autowiring." Watches a
+radiodish/autowire/wiring.py — AutoWirer: the actual "autowiring." Watches a
 Discoverer's peer table and calls RadishSocket.connect() for peers either
 side has a reason to reach.
 """
@@ -9,9 +9,9 @@ from __future__ import annotations
 import asyncio
 from typing import Iterable, Optional
 
-from radish.unified import RadishSocket
-from radish.autowire.discovery import Discoverer
-from radish._internal.groups import groups_as_str
+from radiodish.unified import RadishSocket
+from radiodish.autowire.discovery import Discoverer
+from radiodish._internal.groups import groups_as_str
 
 
 class AutoWirer:

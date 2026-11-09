@@ -8,7 +8,7 @@ Usage:
 import argparse
 import asyncio
 
-from radish import DishSocket
+from radiodish import DishSocket
 
 
 async def main():

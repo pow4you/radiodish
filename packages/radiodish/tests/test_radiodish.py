@@ -1,5 +1,5 @@
 import asyncio
-from radish import RadioSocket, DishSocket
+from radiodish import RadioSocket, DishSocket
 
 
 async def test_basic_group_filtering():

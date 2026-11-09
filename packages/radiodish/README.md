@@ -40,7 +40,7 @@ just the API surface), lives in [`docs/`](docs/index.md):
 ## 30-second version
 
 ```python
-from radish import RadioSocket, DishSocket
+from radiodish import RadioSocket, DishSocket
 
 radio = await RadioSocket().bind("0.0.0.0", 9000)
 radio.connect("127.0.0.1", 9001)
@@ -55,7 +55,7 @@ group, payload = await dish.recv()
 Or skip manual wiring entirely:
 
 ```python
-from radish.autowire import autowired_radish
+from radiodish.autowire import autowired_radish
 
 radish, discoverer, wirer = await autowired_radish(groups=["sensors"])
 radish.broadcast("21.5C", group="sensors")

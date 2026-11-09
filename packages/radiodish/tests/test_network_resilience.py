@@ -1,7 +1,7 @@
 import asyncio
 
-from radish.autowire import Discoverer, AutoWirer
-from radish import RadishSocket
+from radiodish.autowire import Discoverer, AutoWirer
+from radiodish import RadishSocket
 
 
 async def test_start_never_raises_when_multicast_is_blocked():
@@ -9,7 +9,7 @@ async def test_start_never_raises_when_multicast_is_blocked():
     interface (both the any-interface and loopback-scoped attempts) but
     plain UDP bind works -- Discoverer.start() should come up in degraded
     mode, not raise."""
-    import radish.autowire.discovery as aw
+    import radiodish.autowire.discovery as aw
 
     real_make_socket = aw._make_discovery_socket
 
@@ -133,7 +133,7 @@ async def test_discoverer_refreshes_own_addresses_when_they_change():
     up a richer one later on its own, without needing a restart -- this is
     what makes it possible for such a node to ever be reachable via
     anything but loopback."""
-    import radish.autowire.discovery as aw
+    import radiodish.autowire.discovery as aw
 
     d = Discoverer(
         node_id="was-offline", addresses=["127.0.0.1"], port=40030,
@@ -191,7 +191,7 @@ async def test_autowirer_connects_new_address_for_already_wired_peer():
     )
 
     # simulate discovering a peer that, at first, only knows about loopback
-    from radish.autowire import PeerInfo
+    from radiodish.autowire import PeerInfo
     import time
 
     discoverer._peers["peer-1"] = PeerInfo(
@@ -232,7 +232,7 @@ async def test_falls_back_to_loopback_scoped_multicast():
     rather than dropping straight to no-multicast-at-all. Simulates the
     any-interface failure (the WiFi-off case); the loopback attempt itself
     is real, not mocked, since that's the actual mechanism being tested."""
-    import radish.autowire.discovery as aw
+    import radiodish.autowire.discovery as aw
 
     real_make_socket = aw._make_discovery_socket
 
@@ -260,7 +260,7 @@ async def test_loopback_scoped_multicast_actually_delivers():
     loopback tier (simulating any-interface being unavailable on both),
     should still genuinely find each other over real (loopback-scoped)
     multicast, not just fall through to the file tier by coincidence."""
-    import radish.autowire.discovery as aw
+    import radiodish.autowire.discovery as aw
 
     real_make_socket = aw._make_discovery_socket
 

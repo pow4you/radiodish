@@ -53,7 +53,7 @@ every example demonstrates.
 The manual, RFC-48-literal way to use it:
 
 ```python
-from radish import RadioSocket, DishSocket
+from radiodish import RadioSocket, DishSocket
 
 radio = await RadioSocket(queue_size=1000).bind("0.0.0.0", 9000)
 radio.connect("127.0.0.1", 9001)          # register a dish
@@ -71,7 +71,7 @@ object with one address pair, for when you want to both broadcast and
 receive without juggling two sockets:
 
 ```python
-from radish import RadishSocket
+from radiodish import RadishSocket
 
 node = await RadishSocket().bind("127.0.0.1", 20000)
 node.connect("127.0.0.1", 20010)   # wires both directions at once
@@ -81,10 +81,10 @@ group, payload = await node.recv()      # fed by a background receive loop
 ```
 
 And the fully automatic way — no manual `connect()` calls, no manual
-port picking — is [`radish.autowire`](autowire.md):
+port picking — is [`radiodish.autowire`](autowire.md):
 
 ```python
-from radish.autowire import autowired_radish
+from radiodish.autowire import autowired_radish
 
 radish, discoverer, wirer = await autowired_radish(groups=["sensors"])
 radish.broadcast("21.5C", group="sensors")
@@ -125,7 +125,7 @@ by responsibility, shared internals pulled into a private subpackage
 rather than duplicated:
 
 ```
-radish/                      (lives in src/ on disk; src/ is the `radish` package)
+src/                      (src/ is the `radiodish` package)
     errors.py                 RadioDishError, InvalidGroupError (public re-exports)
     protocol.py                 wire format: encode_frame/decode_frame, MSG_DATA/JOIN/LEAVE
     transport.py                 shared plumbing: _UDPProtocol, _BoundedDropQueue, _Peer
@@ -149,18 +149,18 @@ docs/
                  example_autowire.py
 ```
 
-`radish/__init__.py` and `radish/autowire/__init__.py` each re-export
+`__init__.py` and `autowire/__init__.py` each re-export
 their package's public API, so day-to-day usage only ever needs the
 top-level imports:
 
 ```python
-from radish import RadioSocket, DishSocket, RadishSocket, RadioDishError
-from radish.autowire import autowired_radish
+from radiodish import RadioSocket, DishSocket, RadishSocket, RadioDishError
+from radiodish.autowire import autowired_radish
 ```
 
-`radish._internal` is deliberately private (leading underscore) — the
-group-handling and error-definition code that both `radish.protocol` and
-`radish.autowire.discovery` need, pulled into one place instead of
-duplicated between them. Nothing outside `radish` itself imports from it
+`radiodish._internal` is deliberately private (leading underscore) — the
+group-handling and error-definition code that both `radiodish.protocol` and
+`radiodish.autowire.discovery` need, pulled into one place instead of
+duplicated between them. Nothing outside `radiodish` itself imports from it
 directly, including the `radioactor` package, which only ever reaches
-`RadioDishError` via the public `from radish import RadioDishError`.
+`RadioDishError` via the public `from radiodish import RadioDishError`.

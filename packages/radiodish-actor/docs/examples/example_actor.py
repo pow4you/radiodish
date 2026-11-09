@@ -10,7 +10,7 @@ it discovers 'ping' dynamically the first time it's called):
 
 Run both in separate terminals, same machine or LAN segment -- discovery
 finds them, AutoWirer wires them (symmetrically, in both directions -- see
-radish.autowire.discovery's Discoverer docstring for why that matters),
+radiodish.autowire.discovery's Discoverer docstring for why that matters),
 and calls flow.
 """
 import asyncio

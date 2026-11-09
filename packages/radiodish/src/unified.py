@@ -1,6 +1,6 @@
 """
-radish/unified.py — RadishSocket: a RadioSocket and a DishSocket behind
-one object, one address pair. "The actor has the radish, the radish has
+radiodish/unified.py — radiodishSocket: a RadioSocket and a DishSocket behind
+one object, one address pair. "The actor has the radiodish, the radiodish has
 the queues."
 """
 
@@ -10,10 +10,10 @@ import asyncio
 import socket
 from typing import Optional, Union
 
-from radish.errors import RadioDishError
-from radish.protocol import GroupLike
-from radish.radio import RadioSocket
-from radish.dish import DishSocket
+from radiodish.errors import RadioDishError
+from radiodish.protocol import GroupLike
+from radiodish.radio import RadioSocket
+from radiodish.dish import DishSocket
 
 
 class RadishSocket:

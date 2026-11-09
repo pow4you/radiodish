@@ -1,6 +1,6 @@
-# `radish.autowire` — automatic ports, discovery, and connection
+# `radiodish.autowire` — automatic ports, discovery, and connection
 
-A separate, optional layer on top of `radish`'s core sockets — nothing
+A separate, optional layer on top of `radiodish`'s core sockets — nothing
 here is part of RFC 48, it's pure convenience for the common case of
 "I don't want to manually pick ports or call `.connect()` on every peer
 myself." Four pieces, three independent and one composing them:
@@ -39,7 +39,7 @@ The actual design question here isn't "is there internet access" — it's
 something you ask for explicitly (`seeds=`) rather than something that
 happens automatically. Two tiers are active by default:
 
-### Tier 1: "my machine" (`radish.autowire.local_discovery`)
+### Tier 1: "my machine" (`radiodish.autowire.local_discovery`)
 
 Every `Discoverer` sharing a `discovery_port` writes its own
 announcement into a shared directory, and periodically reads whatever
@@ -76,7 +76,7 @@ to look. The directory is additionally scoped by user ID where available
 unrelated users both running radiodish with the same `discovery_port`
 shouldn't see each other.
 
-### Tier 2: "my LAN" (`radish.autowire.discovery`, UDP multicast)
+### Tier 2: "my LAN" (`radiodish.autowire.discovery`, UDP multicast)
 
 A small homemade mDNS: each node periodically announces
 `(node_id, addresses, port, groups, interest)` to a multicast group
@@ -245,7 +245,7 @@ still off in your environment, the fastest way to narrow it down:
   match exactly. If they do, and files are genuinely appearing there for
   both, the write/scan mechanism is working and the bug is downstream —
   check `discoverer.addresses` on each side, and `wirer.wired_peers` /
-  `radish.radio._peers` to see what actually got connected.
+  `radiodish.radio._peers` to see what actually got connected.
 - `Discoverer._revalidate_loop`'s own docstring has a walkthrough for the
   "reconnected but an already-running node hasn't picked it up yet"
   timing case specifically — a node that started degraded doesn't notice

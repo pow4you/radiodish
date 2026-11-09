@@ -1,5 +1,5 @@
 """
-radish/radio.py — the RADIO socket type from RFC 48: one-way broadcaster,
+radiodish/radio.py — the RADIO socket type from RFC 48: one-way broadcaster,
 MAY connect to any number of DISH sockets, SHALL only send.
 """
 
@@ -9,10 +9,10 @@ import asyncio
 import socket
 from typing import Optional
 
-from radish.errors import RadioDishError
-from radish.protocol import Address, GroupLike, MSG_DATA, MSG_JOIN, MSG_LEAVE, encode_frame, decode_frame
-from radish.transport import _BoundedDropQueue, _UDPProtocol, _Peer
-from radish._internal.groups import normalize_group
+from radiodish.errors import RadioDishError
+from radiodish.protocol import Address, GroupLike, MSG_DATA, MSG_JOIN, MSG_LEAVE, encode_frame, decode_frame
+from radiodish.transport import _BoundedDropQueue, _UDPProtocol, _Peer
+from radiodish._internal.groups import normalize_group
 
 
 class RadioSocket:

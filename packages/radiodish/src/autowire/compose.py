@@ -1,5 +1,5 @@
 """
-radish/autowire/compose.py — autowired_radish(): "on the creation of a
+radiodish/autowire/compose.py — autowired_radish(): "on the creation of a
 radish, autowire its peers." One call that finds ports, binds, joins
 groups, and starts discovery + autowiring together.
 """
@@ -9,10 +9,10 @@ from __future__ import annotations
 import uuid
 from typing import Iterable, Optional
 
-from radish.unified import RadishSocket
-from radish.autowire.network import find_free_port_pair, detect_local_addresses
-from radish.autowire.discovery import Discoverer, DEFAULT_DISCOVERY_PORT
-from radish.autowire.wiring import AutoWirer
+from radiodish.unified import RadishSocket
+from radiodish.autowire.network import find_free_port_pair, detect_local_addresses
+from radiodish.autowire.discovery import Discoverer, DEFAULT_DISCOVERY_PORT
+from radiodish.autowire.wiring import AutoWirer
 
 
 async def autowired_radish(

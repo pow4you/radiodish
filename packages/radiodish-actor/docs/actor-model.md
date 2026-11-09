@@ -168,7 +168,7 @@ interest overlapping a provider's groups gets the consumer to
 *back*, so the provider's DISH never told the consumer's RADIO what it
 had joined, and forward calls silently never transmitted even though
 `wired_peers` looked satisfied on the consumer's side. Fixed at the
-`radish.autowire` layer: `Discoverer` now announces each node's
+`radiodish.autowire` layer: `Discoverer` now announces each node's
 `interest` alongside its `groups`, and `AutoWirer` connects if *either*
 direction has a reason to. Both `docs/examples/example_actor.py` and
 `tests/test_actor.py` exercise this across real separate processes, not

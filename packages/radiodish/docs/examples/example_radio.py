@@ -13,7 +13,7 @@ import argparse
 import asyncio
 import random
 
-from radish import RadioSocket
+from radiodish import RadioSocket
 
 
 async def main():

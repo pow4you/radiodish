@@ -1,5 +1,5 @@
 """
-radish/autowire/local_discovery.py — the "my machine" discovery tier: a
+radiodish/autowire/local_discovery.py — the "my machine" discovery tier: a
 shared directory every same-machine Discoverer reads and writes, with zero
 dependence on networking. See Discoverer's docstring for the full
 reasoning; the short version is that UDP multicast can fail outright with

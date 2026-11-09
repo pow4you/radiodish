@@ -1,5 +1,5 @@
 """
-radish/transport.py — low-level plumbing shared by RadioSocket and
+radiodish/transport.py — low-level plumbing shared by RadioSocket and
 DishSocket: the asyncio protocol wrapper, the bounded/drop-when-full
 queue, and the per-peer bookkeeping record. Extracted here rather than
 duplicated in radio.py and dish.py, or bolted onto whichever class
@@ -13,7 +13,7 @@ import collections
 from dataclasses import dataclass, field
 from typing import Optional
 
-from radish.protocol import Address
+from radiodish.protocol import Address
 
 
 class _BoundedDropQueue:
