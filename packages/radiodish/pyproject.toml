@@ -1,8 +1,8 @@
 [project]
 name = "radiodish"
-version = "1.0.0"
+version = "2.0.0"
 description = "A standalone, async RADIO-DISH implementation over UDP (ZeroMQ RFC 48), with automatic peer discovery and autowiring."
-requires-python = ">=3.9"
+requires-python = ">=3.13"
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
@@ -15,6 +15,7 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://github.com/pow4you/radiodish"
+Documentation = "https://github.com/pow4you/radiodish/blob/main/packages/radiodish/docs/index.md"
 
 [build-system]
 requires = ["setuptools>=77.0"]

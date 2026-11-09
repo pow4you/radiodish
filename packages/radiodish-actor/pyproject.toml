@@ -1,12 +1,12 @@
 [project]
 name = "radiodish-actor"
-version = "1.0.0"
+version = "1.0.1"
 description = "An Erlang-actor-model-flavored layer on top of radiodish -- group-addressed message dispatch over an autowired RADIO-DISH mesh."
-requires-python = ">=3.9"
+requires-python = ">=3.13"
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
-dependencies = ["radiodish>=1.0.0"]
+dependencies = ["radiodish>=2.0.0"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
@@ -14,6 +14,7 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://github.com/pow4you/radiodish"
+Documentation = "https://github.com/pow4you/radiodish/blob/main/packages/radiodish-actor/docs/index.md"
 
 [tool.uv.sources]
 radiodish = { workspace = true }
