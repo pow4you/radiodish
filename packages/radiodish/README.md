@@ -15,7 +15,7 @@ port assignment, peer discovery, and autowiring on top.
   `await`-able coroutine fed by `asyncio`'s event loop — no threads.
 
 Looking for the actor-model layer built on top of this? That's a separate
-package, [`radiodish-actor`](../radiodish-actor/), which depends on this
+package, [`radiodish-actor`](https://github.com/pow4you/radiodish/tree/main/packages/radiodish-actor), which depends on this
 one.
 
 ## Install
@@ -30,12 +30,12 @@ workspace root README — this package is a member of a `uv` workspace.
 ## Documentation
 
 Full documentation, with the reasoning behind the design decisions (not
-just the API surface), lives in [`docs/`](docs/index.md):
+just the API surface), lives in [`docs/`](https://github.com/pow4you/radiodish/blob/main/packages/radiodish/docs/index.md):
 
-- **[docs/index.md](docs/index.md)** — quick start, API sketch, package layout
-- **[docs/protocol.md](docs/protocol.md)** — the RFC 48 wire format and how this implementation maps to it
-- **[docs/autowire.md](docs/autowire.md)** — automatic port assignment, peer discovery (two tiers: same-machine and LAN), and autowiring; the real bugs found while building it and how they were fixed
-- **[docs/examples/](docs/examples/)** — runnable examples, each documented with what it demonstrates and why
+- **[docs/index.md](https://github.com/pow4you/radiodish/blob/main/packages/radiodish/docs/index.md)** — quick start, API sketch, package layout
+- **[docs/protocol.md](https://github.com/pow4you/radiodish/blob/main/packages/radiodish/docs/protocol.md)** — the RFC 48 wire format and how this implementation maps to it
+- **[docs/autowire.md](https://github.com/pow4you/radiodish/blob/main/packages/radiodish/docs/autowire.md)** — automatic port assignment, peer discovery (two tiers: same-machine and LAN), and autowiring; the real bugs found while building it and how they were fixed
+- **[docs/examples/](https://github.com/pow4you/radiodish/tree/main/packages/radiodish/docs/examples)** — runnable examples, each documented with what it demonstrates and why
 
 ## 30-second version
 
@@ -62,4 +62,4 @@ radish.broadcast("21.5C", group="sensors")
 group, payload = await radish.recv()
 ```
 
-See [docs/index.md](docs/index.md) for the full walkthrough.
+See [docs/index.md](https://github.com/pow4you/radiodish/blob/main/packages/radiodish/docs/index.md) for the full walkthrough.
