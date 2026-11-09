@@ -10,12 +10,9 @@ import socket
 from typing import Optional
 
 from radiodish.protocol import Address, GroupLike, MSG_DATA, MSG_JOIN, MSG_LEAVE, encode_frame, decode_frame
-from radiodish.errors import RadioDishError
+from radiodish.errors import RadioDishError, SocketClosedError
 from radiodish.transport import _BoundedDropQueue, _UDPProtocol, _Peer
 from radiodish._internal.groups import normalize_group
-
-from errors import SocketClosedError
-
 
 class DishSocket:
     """
