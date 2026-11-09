@@ -8,6 +8,6 @@ nothing outside radish itself, not even radioactor, needs to import it
 directly. See that module's docstring for the reasoning.
 """
 
-from radish._internal.errors import RadioDishError, InvalidGroupError
+from radish._internal.errors import RadioDishError, InvalidGroupError, SocketClosedError
 
-__all__ = ["RadioDishError", "InvalidGroupError"]
+__all__ = ["RadioDishError", "InvalidGroupError", "SocketClosedError"]

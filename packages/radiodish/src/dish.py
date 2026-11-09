@@ -14,6 +14,8 @@ from radish.errors import RadioDishError
 from radish.transport import _BoundedDropQueue, _UDPProtocol, _Peer
 from radish._internal.groups import normalize_group
 
+from errors import SocketClosedError
+
 
 class DishSocket:
     """
@@ -131,7 +133,7 @@ class DishSocket:
                         return item
 
             if self._closed:
-                raise RuntimeError("DishSocket is closed")
+                raise SocketClosedError("DishSocket is closed")
 
             await self._wake.wait()
 
@@ -156,11 +158,17 @@ class DishSocket:
         self._wake.set()
 
     async def close(self) -> None:
+        if self._closed:
+            return
+
         self._closed = True
+
         if self._rejoin_task:
             self._rejoin_task.cancel()
+
         self._wake.set()  # unblock any pending recv()
         self._peers.clear()
+
         if self._protocol and self._protocol.transport:
             self._protocol.transport.close()
 

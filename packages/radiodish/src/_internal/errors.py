@@ -11,6 +11,8 @@ namespace for that purpose).
 class RadioDishError(Exception):
     """Base error for the whole project."""
 
+class SocketClosedError(RadioDishError):
+    """Throw when the socket is closed"""
 
 class InvalidGroupError(RadioDishError):
     """Raised when a group name violates RFC 48's length constraint (0-255 bytes)."""
