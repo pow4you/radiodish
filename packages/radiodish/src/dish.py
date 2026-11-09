@@ -114,6 +114,8 @@ class DishSocket:
         bounded queue (and thus provide real backpressure/dropping) until a
         recv() call actually consumes them."""
         while True:
+            self._wake.clear()
+
             async with self._recv_lock:
                 addrs = list(self._peers.keys())
                 n = len(addrs)
@@ -127,7 +129,10 @@ class DishSocket:
                     if item is not None:
                         self._rr_cursor = (idx + 1) % n
                         return item
-            self._wake.clear()
+
+            if self._closed:
+                raise RuntimeError("DishSocket is closed")
+
             await self._wake.wait()
 
     def _on_datagram(self, data: bytes, addr: Address):
