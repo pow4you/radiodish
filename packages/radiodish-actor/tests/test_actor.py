@@ -178,7 +178,7 @@ async def test_direct_instantiation_warns():
         warnings.simplefilter("always")
         Caller()
         assert len(caught) == 0, f"a named subclass should not warn, got {caught}"
-
+    assert True == False, f"should not warn, got {caught}"
     print("test_direct_instantiation_warns: PASS")
 
 

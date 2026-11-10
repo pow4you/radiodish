@@ -127,7 +127,6 @@ async def test_autowired_radish_end_to_end():
         await radish.close()
     print("test_autowired_radish_end_to_end: PASS")
 
-
 async def main():
     test_find_free_port_pair_no_collision()
     test_detect_local_addresses_always_includes_loopback()
