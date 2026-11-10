@@ -64,7 +64,7 @@ pip install radiodish          # just the messaging layer
 pip install radiodish-actor    # the actor layer (pulls in radiodish)
 ```
 
-Requires Python 3.9 or newer.
+Requires Python 3.13 or newer.
 
 ## Where to go next
 
@@ -90,6 +90,11 @@ uv sync --all-packages              # editable install of both packages + pytest
 uv run --all-packages pytest        # run every test
 uv run python main.py               # run the demo
 ```
+
+GitHub Actions runs the test suite and builds both distributions on pushes to
+`main` and pull requests. Publishing to PyPI is triggered by publishing a
+GitHub release. Configure PyPI Trusted Publishing for both projects using this
+repository, the `.github/workflows/ci.yml` workflow, and the `pypi` environment.
 
 `--all-packages` matters: a plain `uv sync` installs only what the workspace
 root depends on, which is nothing.

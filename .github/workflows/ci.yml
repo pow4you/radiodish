@@ -1,0 +1,79 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test and build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --all-packages --locked
+
+      - name: Run tests
+        run: uv run --all-packages pytest
+
+      - name: Build radiodish
+        run: uv build packages/radiodish --out-dir packages/radiodish/dist
+
+      - name: Build radiodish-actor
+        run: uv build packages/radiodish-actor --out-dir packages/radiodish-actor/dist
+
+  publish:
+    name: Publish to PyPI
+    if: github.event_name == 'release'
+    needs: test
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    environment:
+      name: pypi
+      url: https://pypi.org/project/radiodish/
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Build distributions
+        run: |
+          uv build packages/radiodish --out-dir packages/radiodish/dist
+          uv build packages/radiodish-actor --out-dir packages/radiodish-actor/dist
+
+      - name: Publish radiodish
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/radiodish/dist/
+
+      - name: Publish radiodish-actor
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/radiodish-actor/dist/
