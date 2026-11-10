@@ -4,6 +4,58 @@ from radiodish.autowire import Discoverer, AutoWirer
 from radiodish import RadishSocket
 
 
+class _SocketSpy:
+    """Wraps discovery's OS-level socket factory so lifecycle tests can see
+    what really happens to sockets. Everything above the factory (the
+    Discoverer, its revalidation, its transports) is the real code; the
+    sockets themselves are real too. The spy only (a) records every socket
+    created, so a test can count how many are still open, and (b) can make
+    multicast, or everything, fail on demand.
+
+    pretend_multicast_works=True hands out a plain socket whenever a
+    multicast join is requested, so "multicast is up" is deterministic
+    regardless of whether this machine's real multicast works -- a test
+    that needs the real thing to succeed would be testing the environment
+    rather than the code."""
+
+    def __init__(self, pretend_multicast_works=True):
+        import radiodish.autowire.discovery as aw
+
+        self._aw = aw
+        self._real = aw._make_discovery_socket
+        self.pretend_multicast_works = pretend_multicast_works
+        self.block_multicast = False
+        self.block_all = False
+        self.created = []
+
+    def __enter__(self):
+        def fake(port, join_multicast=True, multicast_interface=None):
+            if self.block_all or (join_multicast and self.block_multicast):
+                raise OSError("simulated: no socket available")
+            if join_multicast and self.pretend_multicast_works:
+                sock = self._real(port, join_multicast=False)
+            else:
+                sock = self._real(
+                    port, join_multicast=join_multicast, multicast_interface=multicast_interface
+                )
+            self.created.append(sock)
+            return sock
+
+        self._aw._make_discovery_socket = fake
+        return self
+
+    def __exit__(self, *exc):
+        self._aw._make_discovery_socket = self._real
+
+    def open_count(self):
+        return sum(1 for s in self.created if s.fileno() != -1)
+
+
+async def _let_transports_close():
+    # transport.close() releases the socket on the next loop iteration
+    await asyncio.sleep(0.05)
+
+
 async def test_start_never_raises_when_multicast_is_blocked():
     """Simulate an environment where multicast join fails on every
     interface (both the any-interface and loopback-scoped attempts) but
@@ -32,68 +84,104 @@ async def test_start_never_raises_when_multicast_is_blocked():
         aw._make_discovery_socket = real_make_socket
 
 
-async def test_upgrade_state_machine():
-    """Fully mocked -- proves the revalidate loop's own logic (swap the
-    socket, flip _multicast_active) works when the outcome of
-    _try_open_socket() changes, WITHOUT depending on whether this
-    environment's real OS multicast actually works at all. That's
-    deliberate: on a machine where real multicast genuinely never succeeds
-    (confirmed possible -- see test_start_never_raises_when_multicast_is_
-    blocked's premise), a test that only passes if the real thing
-    eventually succeeds would be testing the environment, not the code.
-    """
-    d = await Discoverer(
-        node_id="upgrade-test-node", addresses=["127.0.0.1"], port=40010,
-        groups=["chat"], discovery_port=28510,
-    ).start()
-    d._multicast_active = False  # force degraded, regardless of how it actually started
+async def test_revalidation_does_not_leak_sockets():
+    """Revalidating over and over on a stable network must not accumulate
+    discovery sockets: exactly one stays open, however many cycles run."""
+    with _SocketSpy() as spy:
+        d = await Discoverer(
+            node_id="leak-test-node", addresses=["127.0.0.1"], port=40070,
+            groups=["chat"], discovery_port=28550,
+        ).start()
+        for _ in range(25):
+            await d._revalidate_once()
+        await _let_transports_close()
 
-    async def fake_try_open_succeeds():
-        d._multicast_active = True
-        return True
-
-    d._try_open_socket = fake_try_open_succeeds
-    for t in d._tasks:
-        t.cancel()
-    d._tasks = [asyncio.ensure_future(d._revalidate_loop(interval=0.1))]
-
-    deadline = asyncio.get_event_loop().time() + 2.0
-    while asyncio.get_event_loop().time() < deadline and not d._multicast_active:
-        await asyncio.sleep(0.05)
-
-    assert d._multicast_active is True, "revalidate loop never picked up the simulated upgrade"
-    await d.stop()
-    print("test_upgrade_state_machine: PASS")
+        assert len(spy.created) >= 26, "each cycle should have opened a fresh socket"
+        assert spy.open_count() == 1, (
+            f"{spy.open_count()} discovery sockets still open after 25 "
+            "revalidations of an unchanged network -- old ones are leaking"
+        )
+        await d.stop()
+        await _let_transports_close()
+        assert spy.open_count() == 0, "stop() should release the last socket"
+    print("test_revalidation_does_not_leak_sockets: PASS")
 
 
-async def test_downgrade_state_machine():
-    """The other direction, which the first version of this fix didn't
-    have at all: a Discoverer that WAS in multicast-active mode should
-    detect and gracefully fall back if multicast setup starts failing
-    later (network dropped mid-session), not just upgrade from a cold
-    degraded start."""
-    d = await Discoverer(
-        node_id="downgrade-test-node", addresses=["127.0.0.1"], port=40011,
-        groups=["chat"], discovery_port=28511,
-    ).start()
-    d._multicast_active = True  # force active, regardless of how it actually started
+async def test_upgrade_replaces_and_closes_old_socket():
+    """Degraded start, then multicast becomes available: the next
+    revalidation upgrades the tier AND releases the plain socket it
+    replaced."""
+    with _SocketSpy() as spy:
+        spy.block_multicast = True
+        d = await Discoverer(
+            node_id="upgrade-test-node", addresses=["127.0.0.1"], port=40071,
+            groups=["chat"], discovery_port=28551,
+        ).start()
+        assert d._multicast_active is False
+        first = spy.created[0]
+        assert spy.open_count() == 1
 
-    async def fake_try_open_now_fails():
-        d._multicast_active = False
-        return True  # still got SOME socket (degraded/plain), just not multicast
+        spy.block_multicast = False
+        await d._revalidate_once()
+        await _let_transports_close()
 
-    d._try_open_socket = fake_try_open_now_fails
-    for t in d._tasks:
-        t.cancel()
-    d._tasks = [asyncio.ensure_future(d._revalidate_loop(interval=0.1))]
+        assert d._multicast_active is True, "revalidation never picked up the upgrade"
+        assert first.fileno() == -1, "the socket replaced by the upgrade was never closed"
+        assert spy.open_count() == 1
+        await d.stop()
+    print("test_upgrade_replaces_and_closes_old_socket: PASS")
 
-    deadline = asyncio.get_event_loop().time() + 2.0
-    while asyncio.get_event_loop().time() < deadline and d._multicast_active:
-        await asyncio.sleep(0.05)
 
-    assert d._multicast_active is False, "revalidate loop never noticed multicast went away"
-    await d.stop()
-    print("test_downgrade_state_machine: PASS")
+async def test_downgrade_replaces_and_closes_old_socket():
+    """The other direction: multicast works at start, then stops. The next
+    revalidation falls back to a plain socket and releases the multicast
+    one."""
+    with _SocketSpy() as spy:
+        d = await Discoverer(
+            node_id="downgrade-test-node", addresses=["127.0.0.1"], port=40072,
+            groups=["chat"], discovery_port=28552,
+        ).start()
+        assert d._multicast_active is True
+        first = spy.created[0]
+
+        spy.block_multicast = True
+        await d._revalidate_once()
+        await _let_transports_close()
+
+        assert d._multicast_active is False, "revalidation never noticed multicast went away"
+        assert first.fileno() == -1, "the multicast socket was never closed after the downgrade"
+        assert spy.open_count() == 1
+        await d.stop()
+    print("test_downgrade_replaces_and_closes_old_socket: PASS")
+
+
+async def test_failed_revalidation_keeps_the_working_socket():
+    """If a revalidation cycle can't open ANY socket (transient failure),
+    the socket that was working must stay open and active, not be torn
+    down -- and a later cycle that succeeds must recover cleanly."""
+    with _SocketSpy() as spy:
+        d = await Discoverer(
+            node_id="keep-old-node", addresses=["127.0.0.1"], port=40073,
+            groups=["chat"], discovery_port=28553,
+        ).start()
+        before = d._protocol
+        state = (d._multicast_active, d._multicast_scope)
+
+        spy.block_all = True
+        await d._revalidate_once()
+        await _let_transports_close()
+        assert d._protocol is before
+        assert not before.transport.is_closing(), "a working socket was closed over a failed attempt"
+        assert (d._multicast_active, d._multicast_scope) == state
+        assert spy.open_count() == 1
+
+        spy.block_all = False
+        await d._revalidate_once()
+        await _let_transports_close()
+        assert d._protocol is not before
+        assert spy.open_count() == 1
+        await d.stop()
+    print("test_failed_revalidation_keeps_the_working_socket: PASS")
 
 
 async def test_same_machine_discovery_independent_of_multicast():
@@ -301,8 +389,10 @@ async def test_loopback_scoped_multicast_actually_delivers():
 
 async def main():
     await test_start_never_raises_when_multicast_is_blocked()
-    await test_upgrade_state_machine()
-    await test_downgrade_state_machine()
+    await test_revalidation_does_not_leak_sockets()
+    await test_upgrade_replaces_and_closes_old_socket()
+    await test_downgrade_replaces_and_closes_old_socket()
+    await test_failed_revalidation_keeps_the_working_socket()
     await test_same_machine_discovery_independent_of_multicast()
     await test_discoverer_refreshes_own_addresses_when_they_change()
     await test_autowirer_connects_new_address_for_already_wired_peer()

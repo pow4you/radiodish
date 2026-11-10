@@ -73,6 +73,12 @@ class RadishSocket:
         self._tasks: list[asyncio.Task] = []
         self._closed = False
 
+    @property
+    def port(self) -> Optional[int]:
+        """The base port (what a peer passes to connect()): the RADIO half
+        listens here and the DISH half on port + 1. None until bind()."""
+        return self._radio_port
+
     async def bind(
         self,
         host: str,
@@ -82,10 +88,25 @@ class RadishSocket:
         dish_sock: Optional[socket.socket] = None,
     ) -> "RadishSocket":
         """Binds the RADIO half on base_port and the DISH half on
-        base_port + 1, then starts the two background loops. If radio_sock
-        and dish_sock are given (already-bound UDP sockets, e.g. from
+        base_port + 1, then starts the two background loops.
+
+        With base_port=0 (the default) a free adjacent pair is chosen for
+        you -- read it back from `.port`. If radio_sock and dish_sock are
+        given (already-bound UDP sockets, e.g. from
         autowire.find_free_port_pair()), those are used as-is instead of
-        binding fresh ones from (host, base_port)."""
+        binding fresh ones from (host, base_port); pass both or neither."""
+        if (radio_sock is None) != (dish_sock is None):
+            raise ValueError("pass both radio_sock and dish_sock, or neither")
+        if radio_sock is None and base_port == 0:
+            # "No port asked for" can't mean bind(host, 0) and bind(host, 1):
+            # an OS-assigned port isn't adjacent to anything, and port 1 is
+            # privileged. find_free_port_pair() returns an adjacent pair that
+            # is already bound, so nobody can take a port between "found it
+            # free" and "bound it". (Imported here because radiodish.autowire
+            # itself imports this module.)
+            from radiodish.autowire.network import find_free_port_pair
+
+            _, radio_sock, dish_sock = find_free_port_pair(host)
         if radio_sock is not None and dish_sock is not None:
             await self.radio.bind(sock=radio_sock)
             await self.dish.bind(sock=dish_sock)
@@ -93,7 +114,11 @@ class RadishSocket:
             self._dish_port = dish_sock.getsockname()[1]
         else:
             await self.radio.bind(host, base_port)
-            await self.dish.bind(host, base_port + 1)
+            try:
+                await self.dish.bind(host, base_port + 1)
+            except BaseException:
+                await self.radio.close()  # don't leave half a RadishSocket bound
+                raise
             self._radio_port, self._dish_port = base_port, base_port + 1
         self._host = host
         self._tasks.append(asyncio.ensure_future(self._recv_loop()))

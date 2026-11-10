@@ -170,11 +170,15 @@ had joined, and forward calls silently never transmitted even though
 `wired_peers` looked satisfied on the consumer's side. Fixed at the
 `radiodish.autowire` layer: `Discoverer` now announces each node's
 `interest` alongside its `groups`, and `AutoWirer` connects if *either*
-direction has a reason to. Both `docs/examples/example_actor.py` and
-`tests/test_actor.py` exercise this across real separate processes, not
-just in one asyncio event loop, specifically because this class of bug
-looks completely fine single-process and only breaks once there's
-actually a wire between two independent processes.
+direction has a reason to. This class of bug looks completely fine
+single-process and only breaks once there's actually a wire between two
+independent processes, so it's checked that way:
+`docs/examples/example_actor.py` is meant to be run as two separate
+processes, and `tests/test_cross_process.py` automates exactly that (a
+provider and a caller launched as real subprocesses, each with its own
+temp directory on POSIX). `tests/test_actor.py` runs everything in one
+event loop and covers the actor logic itself, not the wire between
+processes.
 
 ## One open piece, flagged rather than built
 

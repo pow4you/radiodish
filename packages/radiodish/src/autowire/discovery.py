@@ -56,25 +56,29 @@ def _make_discovery_socket(
     which doesn't depend on the OS's auto-selection logic at all.
     """
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    if hasattr(socket, "SO_REUSEPORT"):
-        try:
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-        except OSError:
-            pass
-    s.bind(("", port))
-    if join_multicast:
-        interface_bytes = (
-            socket.inet_aton(multicast_interface)
-            if multicast_interface
-            else struct.pack("=I", socket.INADDR_ANY)
-        )
-        mreq = struct.pack("4s4s", socket.inet_aton(MULTICAST_GROUP), interface_bytes)
-        s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
-        s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
-        s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 1)
-        if multicast_interface:
-            s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, socket.inet_aton(multicast_interface))
+    try:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        if hasattr(socket, "SO_REUSEPORT"):
+            try:
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+            except OSError:
+                pass
+        s.bind(("", port))
+        if join_multicast:
+            interface_bytes = (
+                socket.inet_aton(multicast_interface)
+                if multicast_interface
+                else struct.pack("=I", socket.INADDR_ANY)
+            )
+            mreq = struct.pack("4s4s", socket.inet_aton(MULTICAST_GROUP), interface_bytes)
+            s.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+            s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
+            s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 1)
+            if multicast_interface:
+                s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, socket.inet_aton(multicast_interface))
+    except BaseException:
+        s.close()  # don't leak a half-configured socket if bind/join fails
+        raise
     return s
 
 
@@ -230,7 +234,9 @@ class Discoverer:
         self._tasks.append(asyncio.ensure_future(self._revalidate_loop()))
         return self
 
-    async def _try_open_socket(self) -> bool:
+    async def _open_candidate(
+        self,
+    ) -> Optional[tuple["_DiscoveryProtocol", bool, Optional[str]]]:
         """
         Three tiers, tried in order, each a fallback for the previous
         one's failure:
@@ -251,36 +257,64 @@ class Discoverer:
         degraded tier-3 case). self._multicast_active tells you whether
         SOME form of multicast landed (tier 1 or 2); self._multicast_scope
         tells you which one ("any", "loopback", or None).
+
+        Has no side effects on `self`: returns (protocol, multicast_active,
+        multicast_scope) for the caller to adopt, or None if no socket at
+        all could be opened. Opening a socket and making it the active one
+        are separate steps so a failed attempt can never disturb a working
+        socket, and so the old one is always closed when it IS replaced.
         """
         loop = asyncio.get_running_loop()
-        for scope in ("any", "loopback"):
+        active, scope = False, None
+        for tier in ("any", "loopback"):
             try:
-                interface = "127.0.0.1" if scope == "loopback" else None
+                interface = "127.0.0.1" if tier == "loopback" else None
                 sock = _make_discovery_socket(
                     self._discovery_port, join_multicast=True, multicast_interface=interface
                 )
-                self._multicast_active = True
-                self._multicast_scope = scope
+                active, scope = True, tier
                 break
             except OSError:
                 continue
         else:
             try:
                 sock = _make_discovery_socket(self._discovery_port, join_multicast=False)
-                self._multicast_active = False
-                self._multicast_scope = None
             except OSError:
-                return False
-        _transport, protocol = await loop.create_datagram_endpoint(
-            lambda: _DiscoveryProtocol(self._on_datagram), sock=sock,
-        )
-        self._protocol = protocol
+                return None
+        try:
+            _transport, protocol = await loop.create_datagram_endpoint(
+                lambda: _DiscoveryProtocol(self._on_datagram), sock=sock,
+            )
+        except OSError:
+            sock.close()
+            return None
+        return protocol, active, scope
+
+    def _adopt(self, candidate: tuple["_DiscoveryProtocol", bool, Optional[str]]) -> None:
+        """Make `candidate` the active discovery socket and close the one it
+        replaces. The new socket is already open before the old one closes,
+        so there is no gap in listening."""
+        old = self._protocol
+        self._protocol, self._multicast_active, self._multicast_scope = candidate
+        if old is not None and old.transport is not None:
+            old.transport.close()
+
+    async def _try_open_socket(self) -> bool:
+        """Open a fresh discovery socket and, if that worked, make it the
+        active one (closing the previous one). Returns whether a socket was
+        obtained. On failure nothing changes: a working socket is kept
+        rather than torn down over a transient hiccup."""
+        candidate = await self._open_candidate()
+        if candidate is None:
+            return False
+        self._adopt(candidate)
         return True
 
     async def _revalidate_loop(self, interval: float = 8.0):
         """Periodically re-attempts full multicast setup from scratch, for
-        the entire lifetime of this Discoverer, and swaps the active
-        socket whenever the outcome differs from the current state --
+        the entire lifetime of this Discoverer, and replaces the
+        active socket with the freshly opened one (closing the old one, so
+        nothing accumulates), re-announcing whenever the tier changed --
         upgrading a degraded node the moment a real network shows up, and
         just as importantly downgrading gracefully (falling back to
         file/seeds discovery, not crashing or going silent) if a network
@@ -326,32 +360,24 @@ class Discoverer:
         try:
             while True:
                 await asyncio.sleep(interval)
-
-                if self._auto_refresh_addresses:
-                    fresh = detect_local_addresses()
-                    if fresh != self.addresses:
-                        self.addresses = fresh
-                        self._send_announce()  # don't wait for the next tick
-
-                was_active = self._multicast_active
-                was_scope = self._multicast_scope
-                old_protocol = self._protocol
-                ok = await self._try_open_socket()
-                if ok and (
-                        self._multicast_active,
-                        self._multicast_scope
-                ) != (was_active, was_scope):
-                    if old_protocol and old_protocol.transport:
-                        old_protocol.transport.close()
-                    self._send_announce()  # don't wait for the next tick
-                elif not ok:
-                    # neither multicast nor even a plain bind worked this
-                    # time around -- keep the OLD socket (if any) rather
-                    # than tearing down a working one over a transient hiccup
-                    self._multicast_active = was_active
-                    self._multicast_scope = was_scope
+                await self._revalidate_once()
         except asyncio.CancelledError:
             pass
+
+    async def _revalidate_once(self) -> None:
+        """One revalidation cycle (see _revalidate_loop for the why)."""
+        if self._auto_refresh_addresses:
+            fresh = detect_local_addresses()
+            if fresh != self.addresses:
+                self.addresses = fresh
+                self._send_announce()  # don't wait for the next tick
+
+        before = (self._multicast_active, self._multicast_scope)
+        if await self._try_open_socket() and (
+            self._multicast_active,
+            self._multicast_scope,
+        ) != before:
+            self._send_announce()  # tier changed: don't wait for the next tick
 
     def _payload(self) -> bytes:
         return json.dumps(

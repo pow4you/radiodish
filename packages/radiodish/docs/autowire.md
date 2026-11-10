@@ -105,14 +105,17 @@ weaker ways every time, not just once at startup:
    `seeds=` unicast still works even here, since that doesn't need
    multicast group membership at all.
 
-This three-step attempt isn't only made once at startup — it's re-run
+This three-step attempt isn't only made once at startup - it's re-run
 every 8 seconds for the *entire lifetime* of the `Discoverer`
-(`_revalidate_loop`), and swaps to a better tier the moment one becomes
-available, or falls back gracefully if a tier that was working stops
-working (network dropped mid-session). Both directions matter: a node
+(`_revalidate_loop`). Each cycle opens a fresh socket and, if that worked,
+switches to it and closes the one it replaces - so it picks up a better
+tier the moment one becomes available, without sockets piling up - and if
+nothing could be opened the working socket is simply kept. It falls back
+gracefully if a tier that was working stops working (network dropped
+mid-session). Both directions matter: a node
 that starts degraded should upgrade automatically once a real network
 shows up, and a node that was on a working LAN shouldn't crash or go
-silent if that network later disappears — it should just fall back to
+silent if that network later disappears - it should just fall back to
 whatever's still available (loopback, or the file tier) without anyone
 needing to restart it.
 
