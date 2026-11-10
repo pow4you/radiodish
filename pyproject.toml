@@ -11,7 +11,21 @@ members = ["packages/*"]
 package = false
 
 [dependency-groups]
-dev = ["pytest>=8", "pytest-asyncio>=0.23"]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.23",
+    "pytest-cov>=6",
+]
+
+[tool.coverage.run]
+source = ["radiodish", "radioactor"]
+branch = true
+parallel = true
+patch = ["subprocess"]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
 
 [tool.pytest.ini_options]
 testpaths = ["packages"]
